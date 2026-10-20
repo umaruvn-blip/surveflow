@@ -1,0 +1,2 @@
+ALTER TABLE surveys
+    ADD COLUMN reward_credit BIGINT NOT NULL DEFAULT 10;

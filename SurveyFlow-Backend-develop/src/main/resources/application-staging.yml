@@ -1,0 +1,25 @@
+spring:
+  config:
+    activate:
+      on-profile: staging
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  docker:
+    compose:
+      enabled: false
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED_STAGING:true}
+
+app:
+  swagger:
+    description: API docs for staging environment
+
+logging:
+  level:
+    root: INFO
+    com.surveyflow: INFO

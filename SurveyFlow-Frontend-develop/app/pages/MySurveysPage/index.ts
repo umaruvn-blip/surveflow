@@ -1,0 +1,1 @@
+export { MySurveysPage } from './MySurveysPage'

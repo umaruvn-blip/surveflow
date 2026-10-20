@@ -1,0 +1,21 @@
+export const path = {
+  credits: '/credits',
+  createSurvey: '/create-survey',
+  dashboard: '/dashboard',
+  exchange: '/exchange',
+  forbidden: '/forbidden',
+  home: '/',
+  login: '/login',
+  mySurveys: '/my-surveys',
+  paymentDemo: (paymentId: number) => `/payments/demo/${paymentId}`,
+  pricing: '/pricing',
+  profile: '/profile',
+  register: '/register',
+  tracking: '/tracking',
+  adminTracking: '/admin/tracking',
+  googleFormsCallback: '/google-forms/callback',
+  leaderboard: '/leaderboard',
+  privacyPolicy: '/privacy-policy',
+  termsOfService: '/terms-of-service',
+  withdraw: '/withdraw'
+} as const

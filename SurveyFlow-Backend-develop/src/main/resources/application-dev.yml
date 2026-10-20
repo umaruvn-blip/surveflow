@@ -1,0 +1,25 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/survey_flow}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  docker:
+    compose:
+      enabled: false
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED_DEV:true}
+
+app:
+  swagger:
+    description: ${APP_SWAGGER_DESCRIPTION_DEV:API docs for development environment}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT_DEV:INFO}
+    com.surveyflow: ${LOGGING_LEVEL_APP_DEV:DEBUG}

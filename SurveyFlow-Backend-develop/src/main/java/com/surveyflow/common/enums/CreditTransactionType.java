@@ -1,0 +1,14 @@
+package com.surveyflow.common.enums;
+
+public enum CreditTransactionType {
+    REGISTRATION_BONUS,
+    REFERRAL_BONUS,
+    SURVEY_CREATION,
+    CREDIT_TOPUP,
+    SURVEY_COMPLETION,
+    SURVEY_PUBLISH,
+    SURVEY_BOOST,
+    REWARD_REDEMPTION,
+    ADMIN_ADJUSTMENT,
+    SURVEY_BUDGET_RELEASE
+}

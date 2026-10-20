@@ -1,0 +1,27 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED_PROD:true}
+  swagger-ui:
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED_PROD:false}
+
+app:
+  jwt:
+    refresh-token-cookie-secure: ${APP_JWT_REFRESH_TOKEN_COOKIE_SECURE:true}
+    refresh-token-cookie-same-site: ${APP_JWT_REFRESH_TOKEN_COOKIE_SAME_SITE:None}
+  swagger:
+    description: ${APP_SWAGGER_DESCRIPTION_PROD:API docs for production environment}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT_PROD:INFO}
+    com.surveyflow: ${LOGGING_LEVEL_APP_PROD:INFO}

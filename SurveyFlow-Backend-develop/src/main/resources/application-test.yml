@@ -1,0 +1,22 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:survey_flow_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED_TEST:true}
+
+app:
+  swagger:
+    description: ${APP_SWAGGER_DESCRIPTION_TEST:API docs for test environment}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT_TEST:INFO}
+    com.surveyflow: ${LOGGING_LEVEL_APP_TEST:DEBUG}

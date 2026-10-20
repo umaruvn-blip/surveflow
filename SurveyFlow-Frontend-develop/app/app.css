@@ -1,0 +1,601 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource-variable/geist';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  color-scheme: light;
+  --background: #f8fcff;
+  --foreground: #071d2f;
+  --card: #ffffff;
+  --card-foreground: #071d2f;
+  --popover: #ffffff;
+  --popover-foreground: #071d2f;
+  --primary: #075fe8;
+  --primary-foreground: #ffffff;
+  --secondary: #17a83a;
+  --secondary-foreground: #ffffff;
+  --muted: #eef7f6;
+  --muted-foreground: #587080;
+  --accent: #eaf4ff;
+  --accent-foreground: #083c9d;
+  --destructive: #d92d45;
+  --border: #cdeee2;
+  --input: #cdeee2;
+  --ring: #075fe8;
+  --radius: 0.75rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #071d2f;
+  --sidebar-primary: #075fe8;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eaf4ff;
+  --sidebar-accent-foreground: #083c9d;
+  --sidebar-border: #cdeee2;
+  --sidebar-ring: #075fe8;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #061521;
+  --foreground: #f3f8fb;
+  --card: #0a2234;
+  --card-foreground: #f3f8fb;
+  --popover: #0a2234;
+  --popover-foreground: #f3f8fb;
+  --primary: #69a7ff;
+  --primary-foreground: #061521;
+  --secondary: #55d66f;
+  --secondary-foreground: #061521;
+  --muted: #122d3e;
+  --muted-foreground: #a7bbc7;
+  --accent: #103a61;
+  --accent-foreground: #eaf4ff;
+  --destructive: #ff7080;
+  --border: rgb(255 255 255 / 12%);
+  --input: rgb(255 255 255 / 16%);
+  --ring: #69a7ff;
+  --sidebar: #0a2234;
+  --sidebar-foreground: #f3f8fb;
+  --sidebar-primary: #69a7ff;
+  --sidebar-primary-foreground: #061521;
+  --sidebar-accent: #103a61;
+  --sidebar-accent-foreground: #eaf4ff;
+  --sidebar-border: rgb(255 255 255 / 12%);
+  --sidebar-ring: #69a7ff;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+    min-width: 320px;
+    background: var(--background);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
+
+.brand-gradient {
+  background: linear-gradient(135deg, #0b59d6 0%, #008dd8 46%, #20c756 100%);
+}
+
+.brand-text {
+  background: linear-gradient(110deg, #075fe8 4%, #008dd8 47%, #17a83a 92%);
+  background-clip: text;
+  color: transparent;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.auth-shell {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 8% 8%, rgb(143 196 255 / 58%) 0 14%, transparent 34%),
+    radial-gradient(ellipse at 92% 88%, rgb(112 222 132 / 52%) 0 15%, transparent 35%),
+    linear-gradient(135deg, #fafdff 0%, #f3fbff 50%, #f6fff7 100%);
+}
+
+.auth-shell::before {
+  position: absolute;
+  inset: 8% auto auto 48%;
+  z-index: -1;
+  width: 1px;
+  height: 84%;
+  content: '';
+  background: linear-gradient(transparent, rgb(7 95 232 / 12%), transparent);
+}
+
+.auth-orb {
+  position: absolute;
+  z-index: -1;
+  border-radius: 999px;
+  filter: blur(4px);
+  opacity: 0.5;
+}
+
+.auth-orb-blue {
+  top: 14%;
+  right: 10%;
+  width: 13rem;
+  height: 13rem;
+  background: rgb(116 185 255 / 32%);
+}
+
+.auth-orb-green {
+  bottom: 8%;
+  left: 36%;
+  width: 10rem;
+  height: 10rem;
+  background: rgb(80 214 108 / 24%);
+}
+
+.dashboard-hero {
+  background:
+    radial-gradient(ellipse at 12% 20%, rgb(111 184 255 / 30%) 0 15%, transparent 37%),
+    radial-gradient(ellipse at 88% 44%, rgb(101 219 123 / 28%) 0 15%, transparent 37%), #ffffff;
+}
+
+.home-shell {
+  background:
+    radial-gradient(ellipse at 8% 8%, rgb(143 196 255 / 52%) 0 13%, transparent 32%),
+    radial-gradient(ellipse at 91% 20%, rgb(112 222 132 / 46%) 0 14%, transparent 33%),
+    radial-gradient(ellipse at 50% 75%, rgb(104 177 255 / 20%) 0 12%, transparent 30%), #faffff;
+}
+
+.home-nav-link {
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: 160ms ease;
+}
+
+.home-nav-link:hover {
+  background: var(--muted);
+  color: var(--primary);
+}
+
+.home-preview-card::before {
+  position: absolute;
+  inset: -1.5rem -1.5rem auto auto;
+  z-index: -1;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 999px;
+  content: '';
+  background: rgb(32 199 86 / 22%);
+  filter: blur(8px);
+}
+
+@media (max-width: 1023px) {
+  .auth-shell::before {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .auth-orb-blue {
+    animation: float 9s ease-in-out infinite;
+  }
+
+  .auth-orb-green {
+    animation: float 11s ease-in-out infinite reverse;
+  }
+}
+
+@keyframes float {
+  50% {
+    transform: translate3d(0, -16px, 0) scale(1.04);
+  }
+}
+
+.unisurvey-shell {
+  background:
+    radial-gradient(ellipse at 10% 8%, rgb(118 188 255 / 58%) 0 17%, transparent 34%),
+    radial-gradient(ellipse at 88% 18%, rgb(101 219 123 / 58%) 0 17%, transparent 34%),
+    radial-gradient(ellipse at 54% 86%, rgb(83 160 255 / 28%) 0 14%, transparent 30%), #fff;
+}
+
+.unisurvey-sidebar {
+  border-right: 1px solid rgb(16 37 31 / 18%);
+  background:
+    radial-gradient(ellipse at 26% 12%, rgb(103 179 255 / 34%) 0 16%, transparent 34%),
+    radial-gradient(ellipse at 78% 78%, rgb(93 218 117 / 34%) 0 16%, transparent 34%), #fff;
+  color: #071d2f;
+}
+
+.unisurvey-nav-link:hover {
+  background: rgb(255 255 255 / 72%);
+  color: #083c9d;
+}
+.unisurvey-nav-link[aria-current='page'] {
+  background: #fff;
+  border: 1px solid rgb(16 37 31 / 14%);
+  color: #083c9d;
+  box-shadow: 0 12px 24px rgb(16 37 31 / 10%);
+}
+.unisurvey-account {
+  border: 1px solid var(--border);
+  background: linear-gradient(90deg, rgb(244 251 255 / 86%) 0 50%, rgb(239 255 242 / 80%) 50% 100%);
+}
+
+.unisurvey-topbar {
+  border-bottom: 1px solid var(--border);
+  background: rgb(255 255 255 / 90%);
+  box-shadow: 0 10px 24px rgb(23 167 164 / 8%);
+  backdrop-filter: blur(14px);
+}
+.unisurvey-window,
+.unisurvey-card {
+  border: 1px solid rgb(8 60 157 / 14%);
+  border-radius: 18px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow:
+    0 16px 34px rgb(8 91 174 / 12%),
+    0 2px 0 rgb(7 29 47 / 5%);
+}
+.unisurvey-window.dashboard-hero {
+  background:
+    radial-gradient(ellipse at 14% 24%, rgb(111 184 255 / 36%) 0 17%, transparent 35%),
+    radial-gradient(ellipse at 86% 42%, rgb(101 219 123 / 34%) 0 17%, transparent 35%),
+    rgb(255 255 255 / 92%);
+}
+.unisurvey-credit-card {
+  background: linear-gradient(135deg, #0b59d6 0%, #008dd8 42%, #20c756 100%);
+  box-shadow: 0 18px 42px rgb(8 91 174 / 16%);
+}
+
+.unisurvey-home-nav {
+  position: sticky;
+  top: 16px;
+  z-index: 30;
+  width: calc(100% - 32px);
+  margin: 16px auto 0;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgb(255 255 255 / 90%);
+  box-shadow: 0 18px 42px rgb(8 91 174 / 16%);
+  backdrop-filter: blur(16px);
+}
+.unisurvey-home-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 36px;
+  padding: 0 0.85rem;
+  border-radius: 10px;
+  color: #163c59;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.unisurvey-home-pill:hover {
+  background: linear-gradient(90deg, #eaf4ff 0 50%, #eaffef 50% 100%);
+  color: #083c9d;
+}
+.unisurvey-home-hero,
+.unisurvey-features,
+.unisurvey-pricing {
+  background:
+    radial-gradient(ellipse at 12% 18%, rgb(126 187 255 / 70%) 0 18%, transparent 36%),
+    radial-gradient(ellipse at 86% 26%, rgb(98 218 121 / 65%) 0 18%, transparent 35%), #fff;
+}
+.unisurvey-features {
+  background:
+    radial-gradient(ellipse at 18% 18%, rgb(92 213 116 / 55%) 0 17%, transparent 34%),
+    radial-gradient(ellipse at 82% 72%, rgb(104 177 255 / 54%) 0 18%, transparent 35%), #fff;
+}
+.unisurvey-hero-title {
+  margin: 1rem 0;
+  color: #071d2f;
+  font-size: clamp(2.75rem, 6vw, 4rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+.unisurvey-hero-copy {
+  max-width: 36rem;
+  margin-bottom: 2rem;
+  color: #4f6a7b;
+  font-size: 1.2rem;
+  line-height: 1.8;
+}
+.unisurvey-browser {
+  position: relative;
+  padding: 4rem 1.75rem 1.75rem;
+  border: 1px solid rgb(8 60 157 / 14%);
+  border-radius: 24px;
+  background: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 92%) 0 36%,
+    rgb(232 244 255 / 88%) 36% 68%,
+    rgb(232 255 239 / 86%) 68% 100%
+  );
+  box-shadow: 0 18px 42px rgb(8 91 174 / 16%);
+}
+.unisurvey-dots {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+.unisurvey-dots i {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 999px;
+  background: #ff6b6b;
+}
+.unisurvey-dots i:nth-child(2) {
+  background: #ffd166;
+}
+.unisurvey-dots i:nth-child(3) {
+  background: #6bdb8f;
+}
+.unisurvey-question-board {
+  padding: 1.1rem;
+  border: 1px dashed rgb(16 37 31 / 35%);
+  border-radius: 16px;
+  background: linear-gradient(90deg, rgb(234 244 255 / 78%) 0 50%, rgb(234 255 239 / 78%) 50% 100%);
+}
+.unisurvey-question-board span {
+  padding: 0.75rem;
+  border: 1px solid rgb(16 37 31 / 18%);
+  border-radius: 10px;
+  background: #fff;
+  color: #163c59;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+.unisurvey-premium-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #d2a53c;
+  border-radius: 999px;
+  background: #ffe28a;
+  color: #6f4a00;
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+.unisurvey-section-title {
+  margin-top: 0.5rem;
+  color: #071d2f;
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-weight: 700;
+}
+.unisurvey-feature-card,
+.unisurvey-pricing-block,
+.unisurvey-login-card {
+  padding: 1.9rem;
+  border: 1px solid rgb(8 60 157 / 14%);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 18px 42px rgb(8 91 174 / 14%);
+}
+.unisurvey-feature-card h3 {
+  margin-top: 1rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.unisurvey-feature-card p {
+  margin-top: 0.7rem;
+  color: #4f6a7b;
+}
+.unisurvey-plus-card {
+  padding: 1.5rem;
+  border-radius: 26px;
+  background: linear-gradient(135deg, #071d2f, #0a3970 58%, #087c3a);
+  box-shadow: 0 24px 60px rgb(7 29 47 / 24%);
+  color: #fff;
+}
+.unisurvey-plus-card h3 {
+  margin: 0.75rem 0 0.4rem;
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+.unisurvey-plus-card p,
+.unisurvey-plus-card small {
+  color: rgb(255 255 255 / 74%);
+}
+.unisurvey-plus-card div span {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border: 1px solid rgb(255 255 255 / 13%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 8%);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.unisurvey-plus-badge {
+  display: inline-flex;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  background: #ffe28a;
+  color: #6f4a00;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.unisurvey-icon-box {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #eaf4ff, #eaffef);
+  color: #083c9d;
+}
+.unisurvey-package {
+  position: relative;
+  display: flex;
+  min-height: 220px;
+  flex-direction: column;
+  padding: 1rem;
+  border: 1px solid rgb(8 60 157 / 14%);
+  border-radius: 18px;
+  background: #fff;
+}
+.unisurvey-package.featured {
+  border: 2px solid #42c95b;
+  background: linear-gradient(180deg, #f8fff9, #fff 46%);
+}
+.unisurvey-package > span {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  border-radius: 999px;
+  background: #d7f9dd;
+  padding: 0.25rem 0.45rem;
+  color: #075b2a;
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+.unisurvey-package small {
+  color: #4f6a7b;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.unisurvey-package strong {
+  margin: 0.75rem 0;
+  color: #071d2f;
+}
+.unisurvey-package p {
+  margin-top: auto;
+  color: #4f6a7b;
+  font-size: 0.75rem;
+}
+.unisurvey-package b {
+  color: #083c9d;
+}
+.unisurvey-back-link {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #163c59;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.unisurvey-benefit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #eaf4ff 0 50%, #eaffef 50% 100%);
+  padding: 0.45rem 0.7rem;
+  color: #163c59;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+@media (max-width: 1023px) {
+  .unisurvey-shell {
+    display: block;
+  }
+}
+
+@media (max-width: 1023px) {
+  .auth-shell::before {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .auth-orb-blue {
+    animation: float 9s ease-in-out infinite;
+  }
+
+  .auth-orb-green {
+    animation: float 11s ease-in-out infinite reverse;
+  }
+}
+
+@keyframes float {
+  50% {
+    transform: translate3d(0, -16px, 0) scale(1.04);
+  }
+}
+
+.unisurvey-register-card {
+  border: 1px solid rgb(8 60 157 / 14%);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 94%);
+  box-shadow: 0 18px 42px rgb(8 91 174 / 14%);
+}
+
+.unisurvey-register-visual {
+  background: linear-gradient(135deg, #071d2f, #0a3970 58%, #087c3a);
+}

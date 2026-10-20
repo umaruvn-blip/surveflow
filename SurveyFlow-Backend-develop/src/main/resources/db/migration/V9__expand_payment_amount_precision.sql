@@ -1,0 +1,1 @@
+ALTER TABLE payments ALTER COLUMN amount TYPE DECIMAL(23,2);

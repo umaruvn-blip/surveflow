@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: survey-flow-postgres
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-survey_flow}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-survey_flow}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  survey-flow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: survey-flow
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SERVER_PORT: 8080
+      SERVER_CONTEXT_PATH: ${SERVER_CONTEXT_PATH:-/}
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:5173}
+      APP_NAME: ${APP_NAME:-survey-flow}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-survey_flow}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_FLYWAY_ENABLED: ${SPRING_FLYWAY_ENABLED:-true}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-validate}
+      AI_MATCHING_SERVICE_URL: ${AI_MATCHING_SERVICE_URL:-http://ai-matching:8000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ai-matching:
+        condition: service_started
+    restart: unless-stopped
+
+  ai-matching:
+    build:
+      context: ./ai-matching
+      dockerfile: Dockerfile
+    container_name: survey-flow-ai-matching
+    ports:
+      - "${AI_MATCHING_PORT:-8000}:8000"
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
