@@ -105,129 +105,260 @@ export function AdminTrackingPage() {
 
       {query.isError && <p role='alert' className='text-destructive'>{getErrorMessage(query.error)}</p>}
 
-      {/* 1. Quick KPI Cards */}
-      <section className='grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'>
-        {/* User Card */}
-        <article className='unisurvey-card p-6 space-y-4'>
-          <div className='flex items-center justify-between'>
-            <Users className='text-primary size-7' />
-            <span className='rounded-md bg-secondary/10 px-2 py-0.5 text-[11px] font-bold text-secondary'>
-              +{userStats?.newUsersLast7Days ?? 0} tuần này
-            </span>
-          </div>
+      {/* 1. User & Survey Performance */}
+      <section className='space-y-4'>
+        <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3'>
           <div>
-            <p className='text-muted-foreground text-xs font-bold uppercase tracking-wider'>Tổng người dùng</p>
-            <strong className='mt-1 block text-3xl font-black text-foreground'>
-              {query.isLoading ? '—' : (userStats?.totalUsers ?? 0)}
-            </strong>
+            <div className='inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary'>
+              <Activity className='size-3.5' />
+              <span>Performance Analytics</span>
+            </div>
+            <h2 className='text-lg font-black text-foreground'>1. User & Survey Performance</h2>
+            <p className='text-xs text-muted-foreground'>
+              Theo dõi quy mô, tốc độ tăng trưởng người dùng, mức độ sử dụng gói Plus và chất lượng hoàn thành khảo sát.
+            </p>
           </div>
-          <div className='flex items-center gap-3 pt-2 text-xs border-t text-muted-foreground'>
-            <span className='flex items-center gap-1'>
-              <GraduationCap className='size-3.5 text-primary' /> {userStats?.studentCount ?? 0} Sinh viên
-            </span>
-            <span>•</span>
-            <span className='flex items-center gap-1'>
-              <Building2 className='size-3.5 text-secondary' /> {userStats?.workerCount ?? 0} Người đi làm
-            </span>
-          </div>
-        </article>
+        </div>
 
-        {/* Subscription Card */}
-        <article className='unisurvey-card p-6 space-y-4'>
-          <div className='flex items-center justify-between'>
-            <Crown className='text-indigo-500 size-7' />
-            <span className='rounded-md bg-indigo-500/10 px-2 py-0.5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400'>
-              {subscriptionStats?.activeSubscribers ?? 0} đang kích hoạt
-            </span>
-          </div>
-          <div>
-            <p className='text-muted-foreground text-xs font-bold uppercase tracking-wider'>Người dùng Subscription</p>
-            <strong className='mt-1 block text-3xl font-black text-foreground'>
-              {query.isLoading ? '—' : (subscriptionStats?.totalSubscribers ?? 0)}
-            </strong>
-          </div>
-          <div className='flex items-center gap-3 pt-2 text-xs border-t text-muted-foreground'>
-            <span className='flex items-center gap-1 text-emerald-600 dark:text-emerald-400'>
-              <CheckCircle2 className='size-3.5' /> {subscriptionStats?.activeSubscribers ?? 0} Active
-            </span>
-            <span>•</span>
-            <span>{subscriptionStats?.expiredSubscribers ?? 0} hết hạn</span>
-          </div>
-        </article>
+        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+          {/* Card 1: Total Users & Weekly Growth */}
+          <article className='unisurvey-card p-5 space-y-3.5'>
+            <div className='flex items-center justify-between'>
+              <span className='rounded-lg bg-primary/10 p-2 text-primary'>
+                <Users className='size-5' />
+              </span>
+              <span
+                className='rounded-md bg-secondary/10 px-2 py-0.5 text-[11px] font-bold text-secondary'
+                title='Weekly User Growth: Tốc độ tăng trưởng người dùng trong tuần'
+              >
+                +{userStats?.newUsersLast7Days ?? 0} Weekly Growth
+              </span>
+            </div>
+            <div>
+              <div className='flex items-baseline justify-between'>
+                <p className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>Total Users</p>
+                <span className='text-[10px] text-muted-foreground'>Quy mô người dùng</span>
+              </div>
+              <strong className='mt-1 block text-3xl font-black text-foreground'>
+                {query.isLoading ? '—' : (userStats?.totalUsers ?? 0)}
+              </strong>
+              <p className='text-[11px] text-muted-foreground mt-0.5'>Tổng số người dùng được ghi nhận</p>
+            </div>
+            <div className='flex items-center justify-between pt-2.5 text-xs border-t text-muted-foreground'>
+              <span className='flex items-center gap-1'>
+                <GraduationCap className='size-3.5 text-primary' /> {userStats?.studentCount ?? 0} Sinh viên
+              </span>
+              <span className='flex items-center gap-1'>
+                <Building2 className='size-3.5 text-secondary' /> {userStats?.workerCount ?? 0} Đi làm
+              </span>
+            </div>
+          </article>
 
-        {/* Surveys Card */}
-        <article className='unisurvey-card p-6 space-y-4'>
-          <div className='flex items-center justify-between'>
-            <ClipboardList className='text-primary size-7' />
-            <span className='rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400'>
-              {surveyStats?.activeSurveys ?? 0} đang mở
-            </span>
-          </div>
-          <div>
-            <p className='text-muted-foreground text-xs font-bold uppercase tracking-wider'>Tổng khảo sát</p>
-            <strong className='mt-1 block text-3xl font-black text-foreground'>
-              {query.isLoading ? '—' : (surveyStats?.totalSurveys ?? 0)}
-            </strong>
-          </div>
-          <div className='flex items-center gap-3 pt-2 text-xs border-t text-muted-foreground'>
-            <span>{surveyStats?.draftSurveys ?? 0} bản nháp</span>
-            <span>•</span>
-            <span>{surveyStats?.closedSurveys ?? 0} đã hoàn thành</span>
-          </div>
-        </article>
+          {/* Card 2: Subscription Users */}
+          <article className='unisurvey-card p-5 space-y-3.5'>
+            <div className='flex items-center justify-between'>
+              <span className='rounded-lg bg-indigo-500/10 p-2 text-indigo-500'>
+                <Crown className='size-5' />
+              </span>
+              <span className='rounded-md bg-indigo-500/10 px-2 py-0.5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400'>
+                {subscriptionStats?.activeSubscribers ?? 0} Active
+              </span>
+            </div>
+            <div>
+              <div className='flex items-baseline justify-between'>
+                <p className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>Subscription Users</p>
+                <span className='text-[10px] text-muted-foreground'>Gói dịch vụ Plus</span>
+              </div>
+              <strong className='mt-1 block text-3xl font-black text-foreground'>
+                {query.isLoading ? '—' : (subscriptionStats?.totalSubscribers ?? 0)}
+              </strong>
+              <p className='text-[11px] text-muted-foreground mt-0.5'>Số người dùng thuộc nhóm subscription</p>
+            </div>
+            <div className='flex items-center justify-between pt-2.5 text-xs border-t text-muted-foreground'>
+              <span className='flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium'>
+                <CheckCircle2 className='size-3.5' /> {subscriptionStats?.activeSubscribers ?? 0} Đang kích hoạt
+              </span>
+              <span>{subscriptionStats?.expiredSubscribers ?? 0} Hết hạn</span>
+            </div>
+          </article>
 
-        {/* Responses & Completion Rate */}
-        <article className='unisurvey-card p-6 space-y-4'>
-          <div className='flex items-center justify-between'>
-            <BadgeCheck className='text-emerald-500 size-7' />
-            <span className='rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary'>
-              {surveyStats?.completionRate ?? 0}% tỷ lệ hoàn thành
-            </span>
-          </div>
-          <div>
-            <p className='text-muted-foreground text-xs font-bold uppercase tracking-wider'>Hoàn thành hợp lệ</p>
-            <strong className='mt-1 block text-3xl font-black text-foreground'>
-              {query.isLoading ? '—' : (surveyStats?.validCompletions ?? 0)}
-            </strong>
-          </div>
-          <div className='flex items-center gap-3 pt-2 text-xs border-t text-muted-foreground'>
-            <span className='flex items-center gap-1'>
-              <MousePointerClick className='size-3.5' /> {surveyStats?.totalFormOpens ?? 0} lượt mở
-            </span>
-            <span>•</span>
-            <span className='flex items-center gap-1 text-rose-500'>
-              <TriangleAlert className='size-3.5' /> {surveyStats?.invalidCodes ?? 0} lỗi
-            </span>
-          </div>
-        </article>
+          {/* Card 3: Total Surveys, Open Surveys & Draft Surveys */}
+          <article className='unisurvey-card p-5 space-y-3.5'>
+            <div className='flex items-center justify-between'>
+              <span className='rounded-lg bg-emerald-500/10 p-2 text-emerald-600 dark:text-emerald-400'>
+                <ClipboardList className='size-5' />
+              </span>
+              <span
+                className='rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400'
+                title='Open Surveys: Số khảo sát đang tiếp nhận phản hồi'
+              >
+                {surveyStats?.activeSurveys ?? 0} Open Surveys
+              </span>
+            </div>
+            <div>
+              <div className='flex items-baseline justify-between'>
+                <p className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>Total Surveys</p>
+                <span className='text-[10px] text-muted-foreground'>Mức tạo khảo sát</span>
+              </div>
+              <strong className='mt-1 block text-3xl font-black text-foreground'>
+                {query.isLoading ? '—' : (surveyStats?.totalSurveys ?? 0)}
+              </strong>
+              <p className='text-[11px] text-muted-foreground mt-0.5'>Tổng số khảo sát được ghi nhận</p>
+            </div>
+            <div className='flex items-center justify-between pt-2.5 text-xs border-t text-muted-foreground'>
+              <span
+                className='font-medium text-amber-600 dark:text-amber-400'
+                title='Draft Surveys: Số khảo sát chưa hoàn tất hoặc chưa xuất bản'
+              >
+                {surveyStats?.draftSurveys ?? 0} Draft Surveys
+              </span>
+              <span>{surveyStats?.closedSurveys ?? 0} Đã đóng</span>
+            </div>
+          </article>
 
-        {/* Credits in Circulation */}
-        <article className='unisurvey-card p-6 space-y-4'>
-          <div className='flex items-center justify-between'>
-            <Coins className='text-amber-500 size-7' />
-            <span className='rounded-md bg-amber-500/10 px-2 py-0.5 text-[11px] font-bold text-amber-600 dark:text-amber-400'>
-              Kinh tế sàn
-            </span>
-          </div>
-          <div>
-            <p className='text-muted-foreground text-xs font-bold uppercase tracking-wider'>Credits lưu thông</p>
-            <strong className='mt-1 block text-3xl font-black text-amber-600 dark:text-amber-400'>
-              {query.isLoading ? '—' : (creditStats?.totalCreditsInWallets?.toLocaleString('vi-VN') ?? 0)}
-            </strong>
-          </div>
-          <div className='flex items-center gap-3 pt-2 text-xs border-t text-muted-foreground'>
-            <span className='flex items-center gap-1'>
-              <Lock className='size-3.5' /> {creditStats?.heldCredits?.toLocaleString('vi-VN') ?? 0} ký quỹ
-            </span>
-            <span>•</span>
-            <span className='flex items-center gap-1'>
-              <Award className='size-3.5' /> {creditStats?.creditsAwarded?.toLocaleString('vi-VN') ?? 0} đã trả
-            </span>
-          </div>
-        </article>
+          {/* Card 4: Valid Completions, Valid Completion Rate & Opened / Error Events */}
+          <article className='unisurvey-card p-5 space-y-3.5'>
+            <div className='flex items-center justify-between'>
+              <span className='rounded-lg bg-teal-500/10 p-2 text-teal-600 dark:text-teal-400'>
+                <BadgeCheck className='size-5' />
+              </span>
+              <span
+                className='rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary'
+                title='Valid Completion Rate: Tỷ lệ hoàn thành khảo sát hợp lệ'
+              >
+                {surveyStats?.completionRate ?? 0}% Valid Rate
+              </span>
+            </div>
+            <div>
+              <div className='flex items-baseline justify-between'>
+                <p className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>Valid Completions</p>
+                <span className='text-[10px] text-muted-foreground'>Hoạt động hoàn thành</span>
+              </div>
+              <strong className='mt-1 block text-3xl font-black text-foreground'>
+                {query.isLoading ? '—' : (surveyStats?.validCompletions ?? 0)}
+              </strong>
+              <p className='text-[11px] text-muted-foreground mt-0.5'>Số lượt hoàn thành khảo sát hợp lệ</p>
+            </div>
+            <div
+              className='flex items-center justify-between pt-2.5 text-xs border-t text-muted-foreground'
+              title='Opened / Error Events: Hoạt động truy cập và lỗi trong quá trình khảo sát'
+            >
+              <span className='flex items-center gap-1'>
+                <MousePointerClick className='size-3.5' /> {surveyStats?.totalFormOpens ?? 0} Opened
+              </span>
+              <span className='flex items-center gap-1 text-rose-500 font-medium'>
+                <TriangleAlert className='size-3.5' /> {surveyStats?.invalidCodes ?? 0} Errors
+              </span>
+            </div>
+          </article>
+        </div>
       </section>
 
-      {/* 2. Automated UTM Attribution Tracking (Tracking Tự Động bằng UTM) */}
+      {/* 2. Credits */}
+      <section className='space-y-4'>
+        <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3'>
+          <div>
+            <div className='inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400'>
+              <Coins className='size-3.5' />
+              <span>Tokenomics & Liquidity</span>
+            </div>
+            <h2 className='text-lg font-black text-foreground'>2. Credits</h2>
+            <p className='text-xs text-muted-foreground'>
+              Đo lường trao đổi giá trị bằng Credits và hoạt động chi trả Credits trên toàn hệ thống.
+            </p>
+          </div>
+        </div>
+
+        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+          {/* Card 1: Credits in Circulation */}
+          <article className='unisurvey-card p-5 space-y-3.5'>
+            <div className='flex items-center justify-between'>
+              <span className='rounded-lg bg-amber-500/10 p-2 text-amber-500'>
+                <Coins className='size-5' />
+              </span>
+              <span className='rounded-md bg-amber-500/10 px-2 py-0.5 text-[11px] font-bold text-amber-600 dark:text-amber-400'>
+                Lưu thông
+              </span>
+            </div>
+            <div>
+              <div className='flex items-baseline justify-between'>
+                <p className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>Credits in Circulation</p>
+                <span className='text-[10px] text-muted-foreground'>Trao đổi giá trị</span>
+              </div>
+              <strong className='mt-1 block text-3xl font-black text-amber-600 dark:text-amber-400'>
+                {query.isLoading ? '—' : (creditStats?.totalCreditsInWallets?.toLocaleString('vi-VN') ?? 0)}
+              </strong>
+              <p className='text-[11px] text-muted-foreground mt-0.5'>Tổng Credits đang lưu thông trong hệ thống</p>
+            </div>
+            <div className='flex items-center justify-between pt-2.5 text-xs border-t text-muted-foreground'>
+              <span className='flex items-center gap-1'>
+                <Lock className='size-3.5 text-amber-500' /> Ký quỹ (Escrow):
+              </span>
+              <span className='font-bold text-foreground'>
+                {creditStats?.heldCredits?.toLocaleString('vi-VN') ?? 0} Credits
+              </span>
+            </div>
+          </article>
+
+          {/* Card 2: Credits Paid */}
+          <article className='unisurvey-card p-5 space-y-3.5'>
+            <div className='flex items-center justify-between'>
+              <span className='rounded-lg bg-emerald-500/10 p-2 text-emerald-500'>
+                <Award className='size-5' />
+              </span>
+              <span className='rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400'>
+                Đã giải ngân
+              </span>
+            </div>
+            <div>
+              <div className='flex items-baseline justify-between'>
+                <p className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>Credits Paid</p>
+                <span className='text-[10px] text-muted-foreground'>Hoạt động chi trả</span>
+              </div>
+              <strong className='mt-1 block text-3xl font-black text-emerald-600 dark:text-emerald-400'>
+                {query.isLoading ? '—' : (creditStats?.creditsAwarded?.toLocaleString('vi-VN') ?? 0)}
+              </strong>
+              <p className='text-[11px] text-muted-foreground mt-0.5'>Số Credits được ghi nhận là đã trả</p>
+            </div>
+            <div className='flex items-center justify-between pt-2.5 text-xs border-t text-muted-foreground'>
+              <span className='flex items-center gap-1'>
+                <Check className='size-3.5 text-emerald-500' /> Chi trả qua:
+              </span>
+              <span className='font-medium text-foreground'>Thưởng khảo sát hợp lệ</span>
+            </div>
+          </article>
+
+          {/* Card 3: Early Bird & Welcome Reserve */}
+          <article className='unisurvey-card p-5 space-y-3.5'>
+            <div className='flex items-center justify-between'>
+              <span className='rounded-lg bg-purple-500/10 p-2 text-purple-500'>
+                <Sparkles className='size-5' />
+              </span>
+              <span className='rounded-md bg-purple-500/10 px-2 py-0.5 text-[11px] font-bold text-purple-600 dark:text-purple-400'>
+                {creditStats?.earlyBirdSlotsUsed ?? 0} / {creditStats?.earlyBirdSlotsTotal ?? 40} slots
+              </span>
+            </div>
+            <div>
+              <div className='flex items-baseline justify-between'>
+                <p className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>Early Bird Reserve</p>
+                <span className='text-[10px] text-muted-foreground'>Ngân sách chào mừng</span>
+              </div>
+              <strong className='mt-1 block text-3xl font-black text-purple-600 dark:text-purple-400'>
+                {((creditStats?.earlyBirdSlotsUsed ?? 0) * 100).toLocaleString('vi-VN')} / {((creditStats?.earlyBirdSlotsTotal ?? 40) * 100).toLocaleString('vi-VN')}
+              </strong>
+              <p className='text-[11px] text-muted-foreground mt-0.5'>Credits đã kích cầu người dùng mới (+100/user)</p>
+            </div>
+            <div className='flex items-center justify-between pt-2.5 text-xs border-t text-muted-foreground'>
+              <span>Tiến độ phát thưởng:</span>
+              <span className='font-bold text-foreground'>
+                {Math.round(((creditStats?.earlyBirdSlotsUsed ?? 0) / (creditStats?.earlyBirdSlotsTotal || 40)) * 100)}%
+              </span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      {/* 3. Automated UTM Attribution Tracking (Tracking Tự Động bằng UTM) */}
       <section className='unisurvey-card p-6 sm:p-8 space-y-6'>
         <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-5'>
           <div>
@@ -457,7 +588,7 @@ export function AdminTrackingPage() {
         </div>
       </section>
 
-      {/* 3. Feedback Attribution & User CSAT (Chuyển từ /tracking sang) */}
+      {/* 4. Feedback Attribution & User CSAT (Chuyển từ /tracking sang) */}
       <section className='unisurvey-card p-6 sm:p-8 space-y-6'>
         <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-5'>
           <div>
@@ -588,7 +719,7 @@ export function AdminTrackingPage() {
         </div>
       </section>
 
-      {/* 3. Phân bố Học thuật, Gói Dịch vụ & Chiến dịch Early Bird */}
+      {/* 5. Phân bố Học thuật, Gói Dịch vụ & Chiến dịch Early Bird */}
       <section className='grid gap-6 lg:grid-cols-3'>
         {/* Early Bird Campaign Status */}
         <article className='unisurvey-card p-6 space-y-4'>
