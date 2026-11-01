@@ -3,7 +3,10 @@ package com.surveyflow.service.impl;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -150,7 +153,7 @@ public class AdminTrackingServiceImpl implements AdminTrackingService {
         // 6. Automated UTM Attribution Stats
         com.surveyflow.dto.response.attribution.AttributionStatsResponse utmAttributionStats = attributionService.getAttributionStats();
 
-        // 7. Demographics (Top Categories & Top Universities)
+        // 7. Demographics (Top Categories, Top Universities & Top Occupations)
         List<Object[]> catRows = surveyRepository.findTopCategories(PageRequest.of(0, 5));
         List<AdminTrackingStatsResponse.NamedCount> topCategories = new ArrayList<>();
         for (Object[] row : catRows) {
@@ -169,6 +172,36 @@ public class AdminTrackingServiceImpl implements AdminTrackingService {
             }
         }
 
+        List<Object[]> occRows = userProfileRepository.findTopOccupations(PageRequest.of(0, 15));
+        Map<String, Long> occMap = new LinkedHashMap<>();
+        for (Object[] row : occRows) {
+            if (row[0] != null) {
+                String rawName = String.valueOf(row[0]).trim();
+                long count = ((Number) row[1]).longValue();
+                String lower = rawName.toLowerCase();
+                String normalized;
+                if (lower.equals("student") || lower.equals("sinh viên")) {
+                    normalized = "Sinh viên";
+                } else if (lower.equals("intern") || lower.equals("thực tập sinh")) {
+                    normalized = "Thực tập sinh";
+                } else if (lower.contains("part-time") || lower.contains("bán thời gian")) {
+                    normalized = "Nhân viên bán thời gian";
+                } else if (lower.equals("administrator") || lower.equals("admin")) {
+                    normalized = "Quản trị viên";
+                } else if (lower.equals("worker") || lower.equals("đi làm")) {
+                    normalized = "Người đi làm";
+                } else {
+                    normalized = rawName;
+                }
+                occMap.put(normalized, occMap.getOrDefault(normalized, 0L) + count);
+            }
+        }
+        List<AdminTrackingStatsResponse.NamedCount> topOccupations = occMap.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .limit(5)
+                .map(e -> new AdminTrackingStatsResponse.NamedCount(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+
         return AdminTrackingStatsResponse.builder()
                 .userStats(userStats)
                 .surveyStats(surveyStats)
@@ -178,6 +211,7 @@ public class AdminTrackingServiceImpl implements AdminTrackingService {
                 .utmAttributionStats(utmAttributionStats)
                 .topCategories(topCategories)
                 .topUniversities(topUniversities)
+                .topOccupations(topOccupations)
                 .build();
     }
 }

@@ -36,9 +36,10 @@ public class AdminTrackingStatsResponse {
     // 6. Automated UTM Attribution Tracking
     private com.surveyflow.dto.response.attribution.AttributionStatsResponse utmAttributionStats;
 
-    // 7. Demographics / Top Categories
+    // 7. Demographics / Top Categories, Universities & Occupations
     private List<NamedCount> topCategories;
     private List<NamedCount> topUniversities;
+    private List<NamedCount> topOccupations;
 
     @Getter
     @Setter

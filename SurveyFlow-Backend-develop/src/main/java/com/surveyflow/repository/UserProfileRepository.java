@@ -20,6 +20,9 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
     @Query("SELECT p.school, COUNT(p) FROM UserProfile p WHERE p.school IS NOT NULL AND TRIM(p.school) <> '' GROUP BY p.school ORDER BY COUNT(p) DESC")
     List<Object[]> findTopUniversities(Pageable pageable);
 
+    @Query("SELECT p.occupation, COUNT(p) FROM UserProfile p WHERE p.occupation IS NOT NULL AND TRIM(p.occupation) <> '' GROUP BY p.occupation ORDER BY COUNT(p) DESC")
+    List<Object[]> findTopOccupations(Pageable pageable);
+
     @Query("SELECT COUNT(p) FROM UserProfile p WHERE p.school IS NOT NULL AND TRIM(p.school) <> ''")
     long countStudents();
 
