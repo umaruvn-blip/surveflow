@@ -411,8 +411,8 @@ public class BankTransferPaymentServiceImpl implements BankTransferPaymentServic
     private AdminPaymentItemResponse toAdminItem(Payment payment) {
         String userName = null;
         if (payment.getUser() != null) {
-            userName = (payment.getUser().getProfile() != null && payment.getUser().getProfile().getFullName() != null)
-                    ? payment.getUser().getProfile().getFullName()
+            userName = (payment.getUser().getProfile() != null && payment.getUser().getProfile().getDisplayName() != null)
+                    ? payment.getUser().getProfile().getDisplayName()
                     : payment.getUser().getEmail();
         }
 
