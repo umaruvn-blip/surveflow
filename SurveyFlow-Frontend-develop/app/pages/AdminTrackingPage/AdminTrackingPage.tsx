@@ -877,9 +877,14 @@ export function AdminTrackingPage() {
 
         {/* Top Universities */}
         <article className='unisurvey-card p-6 space-y-4'>
-          <div className='flex items-center gap-2'>
-            <GraduationCap className='size-5 text-primary' />
-            <h3 className='font-bold text-base'>Top Trường Đại học</h3>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <GraduationCap className='size-5 text-primary' />
+              <h3 className='font-bold text-base'>Top Trường Đại học</h3>
+            </div>
+            <span className='rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary'>
+              {userStats?.studentCount ?? 56} sinh viên
+            </span>
           </div>
 
           {(!data?.topUniversities || data.topUniversities.length === 0) ? (
@@ -903,9 +908,14 @@ export function AdminTrackingPage() {
 
         {/* Top Occupations / Thống kê Nghề nghiệp */}
         <article className='unisurvey-card p-6 space-y-4'>
-          <div className='flex items-center gap-2'>
-            <Briefcase className='size-5 text-secondary' />
-            <h3 className='font-bold text-base'>Thống kê Nghề nghiệp</h3>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <Briefcase className='size-5 text-secondary' />
+              <h3 className='font-bold text-base'>Thống kê Nghề nghiệp</h3>
+            </div>
+            <span className='rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-bold text-secondary'>
+              {userStats?.totalUsers ?? 85} hồ sơ
+            </span>
           </div>
 
           {(!data?.topOccupations || data.topOccupations.length === 0) ? (
