@@ -30,4 +30,8 @@ public interface SubscriptionPriceRepository extends JpaRepository<SubscriptionP
             ORDER BY plan.name ASC, price.billingPeriod ASC
             """)
     List<SubscriptionPrice> findCurrentActivePrices(@Param("at") Instant at);
+
+    Optional<SubscriptionPrice> findFirstByPlan_CodeAndActiveTrueOrderByValidFromDesc(String code);
+
+    Optional<SubscriptionPrice> findFirstByPlan_IdAndActiveTrueOrderByValidFromDesc(Long planId);
 }

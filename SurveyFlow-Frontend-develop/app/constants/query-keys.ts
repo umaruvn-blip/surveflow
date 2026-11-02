@@ -21,7 +21,10 @@ export const QUERY_KEYS = {
     wallet: ['credits', 'wallet'] as const
   },
   payments: {
-    detail: (id: number) => ['payments', id] as const
+    detail: (id: number) => ['payments', id] as const,
+    bankTransfer: (id: number) => ['payments', 'bank-transfer', id] as const,
+    bankTransferHistory: ['payments', 'bank-transfer', 'history'] as const,
+    adminList: (status?: string) => ['admin', 'payments', status] as const
   },
   pricing: {
     creditPackages: ['pricing', 'credit-packages'] as const,

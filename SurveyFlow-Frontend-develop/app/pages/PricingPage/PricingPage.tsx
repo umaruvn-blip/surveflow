@@ -1,16 +1,22 @@
+import { useState } from 'react'
 import { ArrowRight, Check, Coins, Sparkles, Zap } from 'lucide-react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 
+import { BankTransferModal } from '@/components/BankTransferModal/BankTransferModal'
 import { Brand } from '@/components/Brand'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { path } from '@/config/path'
+import { useCreateBankTransferMutation } from '@/hooks/queries/payment/use-payment-queries'
 import {
   useCreditPackagesQuery,
   useSubscriptionPlansQuery
 } from '@/hooks/queries/pricing/use-pricing-queries'
 import { useAuthStore } from '@/stores/auth-store'
+import type { BankTransferPayment } from '@/types/payment.type'
 import type { PlanEntitlement, SubscriptionBillingPeriod } from '@/types/pricing.type'
+import { getErrorMessage } from '@/utils/error'
+import { notify } from '@/utils/notify'
 
 const entitlementNames: Record<string, string> = {
   MONTHLY_CREDITS: 'Credits mỗi tháng',
@@ -65,8 +71,59 @@ function CatalogLoading({ label }: { label: string }) {
 
 export function PricingPage() {
   const accessToken = useAuthStore((state) => state.accessToken)
+  const user = useAuthStore((state) => state.user)
+  const navigate = useNavigate()
   const plansQuery = useSubscriptionPlansQuery()
   const packagesQuery = useCreditPackagesQuery()
+  const createBankTransferMutation = useCreateBankTransferMutation()
+
+  const [activePayment, setActivePayment] = useState<BankTransferPayment | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [processingPlanId, setProcessingPlanId] = useState<number | null>(null)
+  const [processingPackageId, setProcessingPackageId] = useState<number | null>(null)
+
+  const handleSubscribePlus = async (planId: number, priceId?: number) => {
+    if (!accessToken) {
+      notify.info('Vui lòng đăng nhập để nâng cấp gói SurveyFlow Plus')
+      navigate(path.login)
+      return
+    }
+    try {
+      setProcessingPlanId(planId)
+      const order = await createBankTransferMutation.mutateAsync({
+        type: 'SUBSCRIPTION',
+        planId,
+        priceId
+      })
+      setActivePayment(order)
+      setIsModalOpen(true)
+    } catch (error) {
+      notify.error(getErrorMessage(error))
+    } finally {
+      setProcessingPlanId(null)
+    }
+  }
+
+  const handleBuyPackage = async (packageId: number) => {
+    if (!accessToken) {
+      notify.info('Vui lòng đăng nhập để mua gói Credits')
+      navigate(path.login)
+      return
+    }
+    try {
+      setProcessingPackageId(packageId)
+      const order = await createBankTransferMutation.mutateAsync({
+        type: 'CREDIT_TOPUP',
+        packageId
+      })
+      setActivePayment(order)
+      setIsModalOpen(true)
+    } catch (error) {
+      notify.error(getErrorMessage(error))
+    } finally {
+      setProcessingPackageId(null)
+    }
+  }
 
   return (
     <div className='bg-background min-h-screen'>
@@ -221,8 +278,12 @@ export function PricingPage() {
                       </ul>
                     )}
                   </div>
-                  <Button className='mt-8 h-11 w-full rounded-xl bg-white/15 text-white' disabled>
-                    Thanh toán sắp mở
+                  <Button
+                    className='mt-8 h-12 w-full rounded-xl bg-primary hover:bg-primary/90 text-white font-black text-base shadow-lg transition-all cursor-pointer'
+                    disabled={processingPlanId === plan.id}
+                    onClick={() => handleSubscribePlus(plan.id, plan.prices[0]?.id)}
+                  >
+                    {processingPlanId === plan.id ? 'Đang tạo đơn...' : 'Đăng ký ngay'}
                   </Button>
                 </article>
               ))}
@@ -283,8 +344,12 @@ export function PricingPage() {
                         {formatPrice(creditPackage.price, creditPackage.currency)}
                       </strong>
                     </p>
-                    <Button className='mt-6 h-10 w-full rounded-xl' disabled variant='outline'>
-                      Thanh toán sắp mở
+                    <Button
+                      className='mt-6 h-11 w-full rounded-xl brand-gradient text-white font-bold transition-all shadow-md cursor-pointer'
+                      disabled={processingPackageId === creditPackage.id}
+                      onClick={() => handleBuyPackage(creditPackage.id)}
+                    >
+                      {processingPackageId === creditPackage.id ? 'Đang tạo đơn...' : 'Mua gói ngay'}
                     </Button>
                   </article>
                 ))}
@@ -318,6 +383,12 @@ export function PricingPage() {
           <p className='text-muted-foreground text-sm'>© 2026 SurveyFlow</p>
         </div>
       </footer>
+
+      <BankTransferModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        payment={activePayment}
+      />
     </div>
   )
 }

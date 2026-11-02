@@ -72,6 +72,12 @@ app:
     service-url: ${AI_MATCHING_SERVICE_URL:http://localhost:8000}
     default-top-k: ${AI_MATCHING_DEFAULT_TOP_K:10}
     timeout-ms: ${AI_MATCHING_TIMEOUT_MS:5000}
+  payment:
+    bank:
+      bank-id: ${APP_PAYMENT_BANK_ID:VCB}
+      bank-name: ${APP_PAYMENT_BANK_NAME:Vietcombank - Ngân hàng Ngoại thương Việt Nam}
+      account-no: ${APP_PAYMENT_BANK_ACCOUNT_NO:1021713257}
+      account-name: ${APP_PAYMENT_BANK_ACCOUNT_NAME:LE THANH THINH}
 
 logging:
   level:

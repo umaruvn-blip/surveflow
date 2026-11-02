@@ -84,6 +84,23 @@ public class Payment {
     @Column(length = 500)
     private String description;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_price_id")
+    private SubscriptionPrice subscriptionPrice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_subscription_id")
+    private UserSubscription userSubscription;
+
+    @Column(name = "subscription_benefit_credits")
+    private Long subscriptionBenefitCredits;
+
+    @Column(name = "subscription_period_started_at")
+    private Instant subscriptionPeriodStartedAt;
+
+    @Column(name = "subscription_period_expired_at")
+    private Instant subscriptionPeriodExpiredAt;
+
     @Column(name = "paid_at")
     private Instant paidAt;
 

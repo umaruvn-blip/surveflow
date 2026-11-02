@@ -30,7 +30,7 @@ function renderPage(
   return markup
 }
 
-it('shows catalog values from the pricing queries without enabling checkout', () => {
+it('shows catalog values from the pricing queries with bank transfer checkout enabled', () => {
   const html = renderPage(MOCK_SUBSCRIPTION_PLANS, MOCK_CREDIT_PACKAGES)
 
   expect(html).toContain('SurveyFlow Plus')
@@ -39,8 +39,8 @@ it('shows catalog values from the pricing queries without enabling checkout', ()
   expect(html).toContain('2 lượt ưu tiên khảo sát mỗi tháng')
   expect(html).toContain('1.300 Credits')
   expect(html).toContain('99.000')
-  expect(html).toContain('Thanh toán sắp mở')
-  expect(html).toMatch(/<button[^>]*disabled/)
+  expect(html).toContain('Đăng ký ngay')
+  expect(html).toContain('Mua gói ngay')
 })
 
 it('shows loading and empty catalog states', () => {

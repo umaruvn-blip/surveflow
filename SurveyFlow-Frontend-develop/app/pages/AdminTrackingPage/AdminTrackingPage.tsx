@@ -1,16 +1,19 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
   Activity,
   Award,
   BadgeCheck,
+  Briefcase,
   Building2,
   Check,
   CheckCircle2,
   ClipboardList,
+  Clock,
   Coins,
   Copy,
   Crown,
   ExternalLink,
+  Filter,
   GraduationCap,
   Layers,
   Link2,
@@ -19,6 +22,7 @@ import {
   MousePointerClick,
   QrCode,
   Radio,
+  RefreshCw,
   Share2,
   ShieldCheck,
   Sparkles,
@@ -28,12 +32,21 @@ import {
   TriangleAlert,
   Users,
   Wallet,
+  XCircle,
   Zap
 } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
 import { useAdminTrackingSummaryQuery } from '@/hooks/queries/admin/use-admin-tracking'
+import {
+  useAdminPaymentsQuery,
+  useApprovePaymentMutation,
+  useRejectPaymentMutation
+} from '@/hooks/queries/payment/use-payment-queries'
+import type { PaymentStatus } from '@/types/payment.type'
 import { getErrorMessage } from '@/utils/error'
 import { formatTimeAgo } from '@/utils/date'
+import { notify } from '@/utils/notify'
 
 const SOURCE_LABELS: Record<string, { label: string; icon: string }> = {
   facebook: { label: 'Facebook (Group sinh viên / Fanpage)', icon: '🌐' },
@@ -48,12 +61,90 @@ export function AdminTrackingPage() {
   const query = useAdminTrackingSummaryQuery()
   const data = query.data
 
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState<PaymentStatus | 'ALL'>('ALL')
+  const [processingPaymentId, setProcessingPaymentId] = useState<number | null>(null)
+  const adminPaymentsQuery = useAdminPaymentsQuery(
+    paymentStatusFilter === 'ALL' ? undefined : paymentStatusFilter
+  )
+  const approveMutation = useApprovePaymentMutation()
+  const rejectMutation = useRejectPaymentMutation()
+
+  const pendingPaymentsCount = useMemo(() => {
+    return (adminPaymentsQuery.data ?? []).filter((p) => p.status === 'PENDING').length
+  }, [adminPaymentsQuery.data])
+
+  const handleApprovePayment = async (id: number) => {
+    try {
+      setProcessingPaymentId(id)
+      await approveMutation.mutateAsync(id)
+      notify.success('Đã duyệt đơn thanh toán và kích hoạt dịch vụ thành công!')
+    } catch (error) {
+      notify.error(getErrorMessage(error))
+    } finally {
+      setProcessingPaymentId(null)
+    }
+  }
+
+  const handleRejectPayment = async (id: number) => {
+    const reason = window.prompt('Nhập lý do từ chối đơn thanh toán (tùy chọn):')
+    if (reason === null) return
+    try {
+      setProcessingPaymentId(id)
+      await rejectMutation.mutateAsync({ paymentId: id, reason: reason.trim() || undefined })
+      notify.success('Đã từ chối đơn thanh toán thành công!')
+    } catch (error) {
+      notify.error(getErrorMessage(error))
+    } finally {
+      setProcessingPaymentId(null)
+    }
+  }
+
   const userStats = data?.userStats
   const surveyStats = data?.surveyStats
   const creditStats = data?.creditStats
   const feedbackStats = data?.feedbackStats
   const subscriptionStats = data?.subscriptionStats
   const utmStats = data?.utmAttributionStats
+
+  // Lọc chỉ các gói dịch vụ trả phí (loại trừ gói mặc định FREE)
+  const paidPlanBreakdown = useMemo(() => {
+    return (subscriptionStats?.planBreakdown ?? []).filter(
+      (p) => p.planCode?.toUpperCase() !== 'FREE'
+    )
+  }, [subscriptionStats?.planBreakdown])
+
+  const totalPaidSubscribers = useMemo(() => {
+    if (!subscriptionStats?.planBreakdown || subscriptionStats.planBreakdown.length === 0) {
+      return 0
+    }
+    const hasOnlyFree = subscriptionStats.planBreakdown.every(
+      (p) => p.planCode?.toUpperCase() === 'FREE'
+    )
+    if (hasOnlyFree) return 0
+    return paidPlanBreakdown.reduce((acc, curr) => acc + curr.totalCount, 0)
+  }, [paidPlanBreakdown, subscriptionStats?.planBreakdown])
+
+  const activePaidSubscribers = useMemo(() => {
+    if (!subscriptionStats?.planBreakdown || subscriptionStats.planBreakdown.length === 0) {
+      return 0
+    }
+    const hasOnlyFree = subscriptionStats.planBreakdown.every(
+      (p) => p.planCode?.toUpperCase() === 'FREE'
+    )
+    if (hasOnlyFree) return 0
+    return paidPlanBreakdown.reduce((acc, curr) => acc + curr.activeCount, 0)
+  }, [paidPlanBreakdown, subscriptionStats?.planBreakdown])
+
+  const expiredPaidSubscribers = useMemo(() => {
+    if (!subscriptionStats?.planBreakdown || subscriptionStats.planBreakdown.length === 0) {
+      return 0
+    }
+    const hasOnlyFree = subscriptionStats.planBreakdown.every(
+      (p) => p.planCode?.toUpperCase() === 'FREE'
+    )
+    if (hasOnlyFree) return 0
+    return subscriptionStats?.expiredSubscribers ?? 0
+  }, [subscriptionStats?.planBreakdown, subscriptionStats?.expiredSubscribers])
 
   const totalSourceCounts = feedbackStats?.sourceCounts
     ? Object.values(feedbackStats.sourceCounts).reduce((acc, curr) => acc + curr, 0)
@@ -161,7 +252,7 @@ export function AdminTrackingPage() {
                 <Crown className='size-5' />
               </span>
               <span className='rounded-md bg-indigo-500/10 px-2 py-0.5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400'>
-                {subscriptionStats?.activeSubscribers ?? 0} Active
+                {activePaidSubscribers} Active
               </span>
             </div>
             <div>
@@ -170,15 +261,15 @@ export function AdminTrackingPage() {
                 <span className='text-[10px] text-muted-foreground'>Gói dịch vụ Plus</span>
               </div>
               <strong className='mt-1 block text-3xl font-black text-foreground'>
-                {query.isLoading ? '—' : (subscriptionStats?.totalSubscribers ?? 0)}
+                {query.isLoading ? '—' : totalPaidSubscribers}
               </strong>
               <p className='text-[11px] text-muted-foreground mt-0.5'>Số người dùng thuộc nhóm subscription</p>
             </div>
             <div className='flex items-center justify-between pt-2.5 text-xs border-t text-muted-foreground'>
               <span className='flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium'>
-                <CheckCircle2 className='size-3.5' /> {subscriptionStats?.activeSubscribers ?? 0} Đang kích hoạt
+                <CheckCircle2 className='size-3.5' /> {activePaidSubscribers} Đang kích hoạt
               </span>
-              <span>{subscriptionStats?.expiredSubscribers ?? 0} Hết hạn</span>
+              <span>{expiredPaidSubscribers} Hết hạn</span>
             </div>
           </article>
 
@@ -719,8 +810,8 @@ export function AdminTrackingPage() {
         </div>
       </section>
 
-      {/* 5. Phân bố Học thuật, Gói Dịch vụ & Chiến dịch Early Bird */}
-      <section className='grid gap-6 lg:grid-cols-3'>
+      {/* 5. Phân bố Học thuật, Nghề nghiệp, Gói Dịch vụ & Chiến dịch */}
+      <section className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
         {/* Early Bird Campaign Status */}
         <article className='unisurvey-card p-6 space-y-4'>
           <div className='flex items-center justify-between'>
@@ -759,15 +850,15 @@ export function AdminTrackingPage() {
               <h3 className='font-bold text-base'>Phân bố Gói Dịch vụ</h3>
             </div>
             <span className='rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-xs font-bold text-indigo-600 dark:text-indigo-400'>
-              {subscriptionStats?.totalSubscribers ?? 0} người mua
+              {totalPaidSubscribers} người mua
             </span>
           </div>
 
-          {(!subscriptionStats?.planBreakdown || subscriptionStats.planBreakdown.length === 0) ? (
-            <p className='text-xs text-muted-foreground'>Chưa có dữ liệu người dùng đăng ký gói dịch vụ.</p>
+          {paidPlanBreakdown.length === 0 ? (
+            <p className='text-xs text-muted-foreground'>Chưa có dữ liệu người dùng đăng ký gói dịch vụ trả phí.</p>
           ) : (
             <div className='space-y-2'>
-              {subscriptionStats.planBreakdown.map((plan) => (
+              {paidPlanBreakdown.map((plan) => (
                 <div key={plan.planCode} className='flex items-center justify-between text-xs rounded-lg border bg-background/50 p-2.5'>
                   <span className='font-medium text-foreground truncate max-w-[150px]'>
                     {plan.planName}
@@ -809,6 +900,270 @@ export function AdminTrackingPage() {
             </div>
           )}
         </article>
+
+        {/* Top Occupations / Thống kê Nghề nghiệp */}
+        <article className='unisurvey-card p-6 space-y-4'>
+          <div className='flex items-center gap-2'>
+            <Briefcase className='size-5 text-secondary' />
+            <h3 className='font-bold text-base'>Thống kê Nghề nghiệp</h3>
+          </div>
+
+          {(!data?.topOccupations || data.topOccupations.length === 0) ? (
+            <div className='space-y-2'>
+              <div className='flex items-center justify-between text-xs rounded-lg border bg-background/50 p-2.5'>
+                <span className='flex items-center gap-2 font-medium'>
+                  <span className='flex size-5 items-center justify-center rounded-full bg-secondary/10 text-[10px] font-bold text-secondary'>
+                    1
+                  </span>
+                  <span className='truncate max-w-[150px]'>Sinh viên</span>
+                </span>
+                <span className='font-bold text-foreground'>{userStats?.studentCount ?? 0} người</span>
+              </div>
+              <div className='flex items-center justify-between text-xs rounded-lg border bg-background/50 p-2.5'>
+                <span className='flex items-center gap-2 font-medium'>
+                  <span className='flex size-5 items-center justify-center rounded-full bg-secondary/10 text-[10px] font-bold text-secondary'>
+                    2
+                  </span>
+                  <span className='truncate max-w-[150px]'>Người đi làm</span>
+                </span>
+                <span className='font-bold text-foreground'>{userStats?.workerCount ?? 0} người</span>
+              </div>
+            </div>
+          ) : (
+            <div className='space-y-2'>
+              {data.topOccupations.map((occ, index) => (
+                <div key={occ.name} className='flex items-center justify-between text-xs rounded-lg border bg-background/50 p-2.5'>
+                  <span className='flex items-center gap-2 font-medium'>
+                    <span className='flex size-5 items-center justify-center rounded-full bg-secondary/10 text-[10px] font-bold text-secondary'>
+                      {index + 1}
+                    </span>
+                    <span className='truncate max-w-[150px]'>{occ.name}</span>
+                  </span>
+                  <span className='font-bold text-foreground'>{occ.count} người</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </article>
+      </section>
+
+      {/* 6. Quản lý & Đối soát Thanh toán Ngân hàng (Bank Transfer) */}
+      <section className='space-y-4 pt-4 border-t'>
+        <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3'>
+          <div>
+            <div className='inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary'>
+              <ShieldCheck className='size-3.5' />
+              <span>Financial Reconciliation</span>
+            </div>
+            <h2 className='text-lg font-black text-foreground'>
+              6. Quản lý & Đối soát Thanh toán Ngân hàng (Bank Transfer)
+            </h2>
+            <p className='text-xs text-muted-foreground'>
+              Đối chiếu biến động số dư theo mã nội dung chuyển khoản để kích hoạt gói Plus hoặc nạp Credits cho người dùng.
+            </p>
+          </div>
+
+          <div className='flex items-center gap-2 self-start sm:self-auto'>
+            <Button
+              variant='outline'
+              size='sm'
+              className='h-8 text-xs gap-1.5 cursor-pointer'
+              onClick={() => void adminPaymentsQuery.refetch()}
+              disabled={adminPaymentsQuery.isFetching}
+            >
+              <RefreshCw className={`size-3.5 ${adminPaymentsQuery.isFetching ? 'animate-spin' : ''}`} />
+              <span>Làm mới</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Filter Pills */}
+        <div className='flex flex-wrap items-center gap-2'>
+          <span className='text-xs font-semibold text-muted-foreground mr-1 flex items-center gap-1'>
+            <Filter className='size-3' /> Lọc:
+          </span>
+          {[
+            { key: 'ALL', label: 'Tất cả đơn' },
+            { key: 'PENDING', label: 'Chờ duyệt', count: pendingPaymentsCount },
+            { key: 'SUCCESS', label: 'Đã hoàn tất' },
+            { key: 'CANCELLED', label: 'Đã hủy' }
+          ].map((item) => (
+            <button
+              key={item.key}
+              type='button'
+              onClick={() => setPaymentStatusFilter(item.key as PaymentStatus | 'ALL')}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
+                paymentStatusFilter === item.key
+                  ? 'bg-primary text-primary-foreground shadow-xs'
+                  : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+              }`}
+            >
+              <span>{item.label}</span>
+              {item.count !== undefined && item.count > 0 && (
+                <span className='flex size-4 items-center justify-center rounded-full bg-amber-500 text-[10px] font-black text-white'>
+                  {item.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Payments Table Card */}
+        <div className='unisurvey-card overflow-hidden'>
+          {adminPaymentsQuery.isLoading ? (
+            <div className='p-8 text-center text-xs text-muted-foreground'>
+              <RefreshCw className='size-5 animate-spin mx-auto text-primary mb-2' />
+              Đang tải danh sách đơn thanh toán...
+            </div>
+          ) : adminPaymentsQuery.isError ? (
+            <div className='p-6 text-center text-xs text-destructive'>
+              Không thể tải danh sách đơn thanh toán. Vui lòng thử lại.
+            </div>
+          ) : (adminPaymentsQuery.data ?? []).length === 0 ? (
+            <div className='p-8 text-center text-xs text-muted-foreground'>
+              Chưa có đơn thanh toán nào phù hợp với bộ lọc hiện tại.
+            </div>
+          ) : (
+            <div className='overflow-x-auto'>
+              <table className='w-full text-left text-xs'>
+                <thead className='border-b bg-muted/40 text-[11px] font-bold uppercase tracking-wider text-muted-foreground'>
+                  <tr>
+                    <th className='px-4 py-3'>Mã GD / Nội dung</th>
+                    <th className='px-4 py-3'>Khách hàng</th>
+                    <th className='px-4 py-3'>Dịch vụ</th>
+                    <th className='px-4 py-3 text-right'>Số tiền</th>
+                    <th className='px-4 py-3'>Thời gian</th>
+                    <th className='px-4 py-3 text-center'>Trạng thái</th>
+                    <th className='px-4 py-3 text-right'>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className='divide-y divide-border/60'>
+                  {adminPaymentsQuery.data?.map((payment) => {
+                    const isPending = payment.status === 'PENDING'
+                    const isSuccess = payment.status === 'SUCCESS'
+                    const isCancelled = payment.status === 'CANCELLED'
+                    const isProcessing = processingPaymentId === payment.id
+
+                    return (
+                      <tr key={payment.id} className='hover:bg-muted/20 transition-colors'>
+                        {/* Transaction Code */}
+                        <td className='px-4 py-3.5 font-medium'>
+                          <span className='font-mono font-bold text-sm text-foreground bg-primary/10 text-primary px-2 py-0.5 rounded-md'>
+                            {payment.transactionCode || `PAY-${payment.id}`}
+                          </span>
+                        </td>
+
+                        {/* Customer Info */}
+                        <td className='px-4 py-3.5'>
+                          <div className='font-bold text-foreground'>
+                            {payment.userName || 'Người dùng'}
+                          </div>
+                          <div className='text-[11px] text-muted-foreground'>
+                            {payment.userEmail || `User ID: ${payment.userId}`}
+                          </div>
+                        </td>
+
+                        {/* Service & Entitlements */}
+                        <td className='px-4 py-3.5'>
+                          {payment.type === 'SUBSCRIPTION' ? (
+                            <div className='space-y-0.5'>
+                              <span className='inline-flex items-center gap-1 rounded-md bg-indigo-500/10 px-2 py-0.5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400'>
+                                <Crown className='size-3' /> {payment.planName || 'SurveyFlow Plus'}
+                              </span>
+                              <div className='text-[10px] text-muted-foreground'>
+                                +500 Credits đặc quyền / 30 ngày
+                              </div>
+                            </div>
+                          ) : (
+                            <div className='space-y-0.5'>
+                              <span className='inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400'>
+                                <Coins className='size-3' /> Nạp Credits
+                              </span>
+                              <div className='text-[10px] text-muted-foreground'>
+                                +{payment.creditAmount?.toLocaleString('vi-VN')} Credits vào ví
+                              </div>
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Amount */}
+                        <td className='px-4 py-3.5 text-right font-black text-foreground'>
+                          {new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: payment.currency || 'VND'
+                          }).format(payment.amount)}
+                        </td>
+
+                        {/* Created At */}
+                        <td className='px-4 py-3.5 text-muted-foreground'>
+                          <div className='flex items-center gap-1'>
+                            <Clock className='size-3' />
+                            <span>{formatTimeAgo(payment.createdAt)}</span>
+                          </div>
+                        </td>
+
+                        {/* Status Badge */}
+                        <td className='px-4 py-3.5 text-center'>
+                          {isPending && (
+                            <span className='inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-bold text-amber-600 dark:text-amber-400'>
+                              <span className='size-1.5 rounded-full bg-amber-500 animate-pulse' />
+                              Chờ đối soát
+                            </span>
+                          )}
+                          {isSuccess && (
+                            <span className='inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400'>
+                              <CheckCircle2 className='size-3' /> Đã duyệt
+                            </span>
+                          )}
+                          {isCancelled && (
+                            <span className='inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2.5 py-1 text-[11px] font-bold text-destructive'>
+                              <XCircle className='size-3' /> Đã hủy
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Action Buttons */}
+                        <td className='px-4 py-3.5 text-right'>
+                          {isPending ? (
+                            <div className='flex items-center justify-end gap-1.5'>
+                              <Button
+                                size='sm'
+                                className='h-7 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs gap-1 px-2.5 cursor-pointer'
+                                disabled={isProcessing}
+                                onClick={() => handleApprovePayment(payment.id)}
+                              >
+                                <Check className='size-3.5' />
+                                <span>{isProcessing ? 'Đang duyệt...' : 'Duyệt'}</span>
+                              </Button>
+
+                              <Button
+                                size='sm'
+                                variant='outline'
+                                className='h-7 text-xs text-destructive hover:bg-destructive/10 px-2 cursor-pointer'
+                                disabled={isProcessing}
+                                onClick={() => handleRejectPayment(payment.id)}
+                              >
+                                <span>Hủy</span>
+                              </Button>
+                            </div>
+                          ) : isSuccess ? (
+                            <span className='text-[11px] text-muted-foreground'>
+                              {payment.paidAt ? formatTimeAgo(payment.paidAt) : 'Hoàn tất'}
+                            </span>
+                          ) : (
+                            <span className='text-[11px] text-muted-foreground italic' title={payment.description}>
+                              Đã từ chối
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </section>
     </div>
   )

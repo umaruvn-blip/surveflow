@@ -57,4 +57,5 @@ export interface AdminTrackingStats {
   utmAttributionStats?: AttributionStats
   topCategories: NamedCount[]
   topUniversities: NamedCount[]
+  topOccupations?: NamedCount[]
 }

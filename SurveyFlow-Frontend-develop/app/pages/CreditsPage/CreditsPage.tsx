@@ -1,8 +1,18 @@
 import { env } from '@/config/env'
-import { ArrowUpRight, CircleCheck, Coins, Gift, LockKeyhole, ReceiptText } from 'lucide-react'
+import {
+  ArrowUpRight,
+  CircleCheck,
+  Coins,
+  Gift,
+  LockKeyhole,
+  QrCode,
+  ReceiptText,
+  Sparkles
+} from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 
+import { BankTransferModal } from '@/components/BankTransferModal/BankTransferModal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { path } from '@/config/path'
@@ -14,10 +24,14 @@ import {
   useReleaseSurveyBudgetMutation,
   useReserveSurveyBudgetMutation
 } from '@/hooks/queries/credit/use-credit-queries'
-import { useCreateTopupMutation } from '@/hooks/queries/payment/use-payment-queries'
+import {
+  useCreateBankTransferMutation,
+  useCreateTopupMutation
+} from '@/hooks/queries/payment/use-payment-queries'
+import type { RedeemReward } from '@/types/credit.type'
+import type { BankTransferPayment } from '@/types/payment.type'
 import { getErrorMessage } from '@/utils/error'
 import { notify } from '@/utils/notify'
-import type { RedeemReward } from '@/types/credit.type'
 
 const rules = [
   'Hoàn thành khảo sát hợp lệ sẽ được cộng Credits từ ngân sách của người tạo khảo sát.',
@@ -61,14 +75,32 @@ export function CreditsPage() {
   const rewardMutation = useGrantParticipationRewardMutation()
   const redeemMutation = useRedeemRewardMutation()
   const createTopupMutation = useCreateTopupMutation()
+  const createBankTransferMutation = useCreateBankTransferMutation()
+
   const [topupCredits, setTopupCredits] = useState(100)
   const [surveyId, setSurveyId] = useState('')
   const [participationId, setParticipationId] = useState('')
+  const [bankTransferPayment, setBankTransferPayment] = useState<BankTransferPayment | null>(null)
+  const [isBankTransferModalOpen, setIsBankTransferModalOpen] = useState(false)
+
   const wallet = walletQuery.data
   const canTopup =
     Number.isSafeInteger(topupCredits) &&
     topupCredits >= 10 &&
     Number.isSafeInteger(topupCredits * 100)
+
+  async function handleBankTransferTopup() {
+    try {
+      const payment = await createBankTransferMutation.mutateAsync({
+        type: 'CREDIT_TOPUP',
+        credits: topupCredits
+      })
+      setBankTransferPayment(payment)
+      setIsBankTransferModalOpen(true)
+    } catch (error) {
+      notify.error(getErrorMessage(error))
+    }
+  }
 
   async function createTopup() {
     try {
@@ -153,6 +185,90 @@ export function CreditsPage() {
             Thông tin được đồng bộ từ ví của bạn.
           </p>
         </article>
+      </section>
+
+      <section className='unisurvey-card mt-7 p-6 sm:p-8'>
+        <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-5'>
+          <div>
+            <div className='inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary'>
+              <QrCode className='size-3.5' />
+              <span>Chuyển khoản an toàn</span>
+            </div>
+            <h2 className='mt-1 text-2xl font-black'>Nạp Credits trực tiếp</h2>
+            <p className='text-muted-foreground mt-1 text-sm'>
+              Quy đổi: 1 Credit = 100 VNĐ. Quét mã VietQR chuyển khoản chính xác nội dung, hệ thống đối soát duyệt nạp nhanh chóng.
+            </p>
+          </div>
+          <Button asChild variant='outline' className='gap-2 shrink-0'>
+            <Link to={`${path.pricing}#credits`}>
+              <Sparkles className='size-4 text-amber-500' />
+              <span>Xem gói ưu đãi</span>
+            </Link>
+          </Button>
+        </div>
+
+        <div className='mt-6 grid gap-6 md:grid-cols-2'>
+          <div>
+            <label className='block text-sm font-bold' htmlFor='bank-topup-credits'>
+              Số Credits muốn nạp
+            </label>
+            <div className='mt-2 flex items-center gap-3'>
+              <Input
+                className='max-w-xs'
+                id='bank-topup-credits'
+                min='10'
+                onChange={(event) => setTopupCredits(Number(event.target.value))}
+                step='10'
+                type='number'
+                value={topupCredits}
+              />
+              <span className='font-bold text-sm text-primary'>Credits</span>
+            </div>
+
+            <div className='mt-3 flex flex-wrap gap-2'>
+              {[100, 200, 500, 1000].map((preset) => (
+                <button
+                  key={preset}
+                  type='button'
+                  onClick={() => setTopupCredits(preset)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold border transition-all cursor-pointer ${
+                    topupCredits === preset
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-background hover:bg-muted text-muted-foreground'
+                  }`}
+                >
+                  +{preset} Credits
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className='rounded-2xl border bg-muted/20 p-5 flex flex-col justify-between'>
+            <div>
+              <span className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>
+                Số tiền thanh toán
+              </span>
+              <p className='mt-1 text-3xl font-black text-foreground'>
+                {canTopup ? (topupCredits * 100).toLocaleString('vi-VN') : '—'}{' '}
+                <span className='text-lg font-bold text-muted-foreground'>VNĐ</span>
+              </p>
+              <p className='mt-1 text-xs text-muted-foreground'>
+                Miễn phí giao dịch ngân hàng qua mã VietQR
+              </p>
+            </div>
+
+            <Button
+              className='brand-gradient mt-4 text-white font-bold gap-2 cursor-pointer shadow-md'
+              disabled={!canTopup || createBankTransferMutation.isPending}
+              onClick={() => void handleBankTransferTopup()}
+            >
+              <QrCode className='size-4' />
+              {createBankTransferMutation.isPending
+                ? 'Đang khởi tạo VietQR...'
+                : 'Nạp Credits qua Chuyển khoản (VietQR)'}
+            </Button>
+          </div>
+        </div>
       </section>
 
       {(env.VITE_ENABLE_PAYMENT_DEMO || env.VITE_ENABLE_MOCK) && (
@@ -365,6 +481,12 @@ export function CreditsPage() {
           </Button>
         </article>
       </section>
+
+      <BankTransferModal
+        isOpen={isBankTransferModalOpen}
+        onClose={() => setIsBankTransferModalOpen(false)}
+        payment={bankTransferPayment}
+      />
     </div>
   )
 }
