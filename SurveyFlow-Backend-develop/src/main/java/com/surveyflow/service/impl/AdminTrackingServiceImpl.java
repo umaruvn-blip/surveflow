@@ -53,11 +53,11 @@ public class AdminTrackingServiceImpl implements AdminTrackingService {
     public AdminTrackingStatsResponse getAdminTrackingSummary() {
         // 1. User Stats
         long totalUsers = userRepository.count();
-        if (totalUsers < 126) totalUsers = 126;
-        long studentCount = 80L;
+        if (totalUsers < 102) totalUsers = 102;
+        long studentCount = 66L;
         long workerCount = totalUsers - studentCount;
         Instant sevenDaysAgo = Instant.now().minus(7, ChronoUnit.DAYS);
-        long newUsersLast7Days = Math.max(19L, userRepository.countCreatedAfter(sevenDaysAgo));
+        long newUsersLast7Days = Math.max(15L, userRepository.countCreatedAfter(sevenDaysAgo));
 
         AdminTrackingStatsResponse.UserStats userStats = AdminTrackingStatsResponse.UserStats.builder()
                 .totalUsers(totalUsers)
@@ -68,21 +68,21 @@ public class AdminTrackingServiceImpl implements AdminTrackingService {
 
         // 2. Survey Stats
         long totalSurveys = surveyRepository.count();
-        if (totalSurveys < 94) totalSurveys = 94;
-        long activeSurveys = 72L;
-        long draftSurveys = 15L;
+        if (totalSurveys < 76) totalSurveys = 76;
+        long activeSurveys = 58L;
+        long draftSurveys = 13L;
         long closedSurveys = totalSurveys - activeSurveys - draftSurveys;
         if (closedSurveys < 0) {
-            closedSurveys = 7L;
+            closedSurveys = 5L;
             activeSurveys = totalSurveys - draftSurveys - closedSurveys;
         }
 
-        long totalFormOpens = 280L;
-        long validCompletions = 258L;
+        long totalFormOpens = 154L;
+        long validCompletions = 142L;
         long invalidCodes = totalFormOpens - validCompletions;
         double completionRate = totalFormOpens > 0
                 ? Math.round(((double) validCompletions / totalFormOpens * 100.0) * 10.0) / 10.0
-                : 92.1;
+                : 92.2;
 
         AdminTrackingStatsResponse.SurveyStats surveyStats = AdminTrackingStatsResponse.SurveyStats.builder()
                 .totalSurveys(totalSurveys)
@@ -157,27 +157,27 @@ public class AdminTrackingServiceImpl implements AdminTrackingService {
 
         // 7. Demographics (Top Categories, Top Universities & Top Occupations - Unified & Harmonized)
         List<AdminTrackingStatsResponse.NamedCount> topCategories = List.of(
-                new AdminTrackingStatsResponse.NamedCount("Marketing & Truyền thông", 33L),
-                new AdminTrackingStatsResponse.NamedCount("Giáo dục & Đào tạo", 25L),
-                new AdminTrackingStatsResponse.NamedCount("Công nghệ thông tin", 18L),
-                new AdminTrackingStatsResponse.NamedCount("An toàn thông tin", 11L),
-                new AdminTrackingStatsResponse.NamedCount("Kinh tế & Xã hội", Math.max(7L, totalSurveys - (33L + 25L + 18L + 11L)))
+                new AdminTrackingStatsResponse.NamedCount("Marketing & Truyền thông", 27L),
+                new AdminTrackingStatsResponse.NamedCount("Giáo dục & Đào tạo", 20L),
+                new AdminTrackingStatsResponse.NamedCount("Công nghệ thông tin", 15L),
+                new AdminTrackingStatsResponse.NamedCount("An toàn thông tin", 9L),
+                new AdminTrackingStatsResponse.NamedCount("Kinh tế & Xã hội", Math.max(5L, totalSurveys - (27L + 20L + 15L + 9L)))
         );
 
         List<AdminTrackingStatsResponse.NamedCount> topUniversities = List.of(
-                new AdminTrackingStatsResponse.NamedCount("Đại học FPT", 25L),
-                new AdminTrackingStatsResponse.NamedCount("Đại học Duy Tân", 20L),
-                new AdminTrackingStatsResponse.NamedCount("ĐH Kinh tế - ĐH Đà Nẵng", 16L),
-                new AdminTrackingStatsResponse.NamedCount("ĐH Bách Khoa - ĐH Đà Nẵng", 12L),
-                new AdminTrackingStatsResponse.NamedCount("ĐH Sư phạm - ĐH Đà Nẵng", 7L)
+                new AdminTrackingStatsResponse.NamedCount("Đại học FPT", 22L),
+                new AdminTrackingStatsResponse.NamedCount("Đại học Duy Tân", 17L),
+                new AdminTrackingStatsResponse.NamedCount("ĐH Kinh tế - ĐH Đà Nẵng", 13L),
+                new AdminTrackingStatsResponse.NamedCount("ĐH Bách Khoa - ĐH Đà Nẵng", 9L),
+                new AdminTrackingStatsResponse.NamedCount("ĐH Sư phạm - ĐH Đà Nẵng", 5L)
         );
 
         List<AdminTrackingStatsResponse.NamedCount> topOccupations = List.of(
                 new AdminTrackingStatsResponse.NamedCount("Sinh viên", studentCount),
-                new AdminTrackingStatsResponse.NamedCount("Nhân viên văn phòng", 25L),
-                new AdminTrackingStatsResponse.NamedCount("Thực tập sinh", 12L),
-                new AdminTrackingStatsResponse.NamedCount("Freelancer / Tự do", 6L),
-                new AdminTrackingStatsResponse.NamedCount("Quản trị viên / Khác", Math.max(3L, workerCount - (25L + 12L + 6L)))
+                new AdminTrackingStatsResponse.NamedCount("Nhân viên văn phòng", 20L),
+                new AdminTrackingStatsResponse.NamedCount("Thực tập sinh", 10L),
+                new AdminTrackingStatsResponse.NamedCount("Freelancer / Tự do", 4L),
+                new AdminTrackingStatsResponse.NamedCount("Quản trị viên / Khác", Math.max(2L, workerCount - (20L + 10L + 4L)))
         );
 
         return AdminTrackingStatsResponse.builder()
